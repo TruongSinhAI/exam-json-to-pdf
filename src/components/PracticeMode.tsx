@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
   ChevronLeft,
@@ -9,7 +9,6 @@ import {
   XCircle,
   RotateCcw,
   Trophy,
-  ArrowRight,
   Shuffle,
   ListOrdered,
   Eye,
@@ -42,6 +41,10 @@ export default function PracticeMode({ questions }: PracticeModeProps) {
   const [revealedQuestions, setRevealedQuestions] = useState<Set<string>>(new Set())
   const [showSetup, setShowSetup] = useState(!practiceSession)
 
+  const scrollToTop = useCallback(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" })
+  }, [])
+
   // Setup screen
   if (showSetup || !practiceSession) {
     return (
@@ -50,6 +53,7 @@ export default function PracticeMode({ questions }: PracticeModeProps) {
         onStart={(ids, isRandom) => {
           startPractice(ids, isRandom)
           setShowSetup(false)
+          scrollToTop()
         }}
       />
     )
@@ -63,6 +67,7 @@ export default function PracticeMode({ questions }: PracticeModeProps) {
         onRestart={() => {
           setRevealedQuestions(new Set())
           setShowSetup(true)
+          scrollToTop()
         }}
       />
     )
@@ -103,6 +108,12 @@ export default function PracticeMode({ questions }: PracticeModeProps) {
       handleReveal()
     }
     nextPracticeQuestion()
+    scrollToTop()
+  }
+
+  const handlePrev = () => {
+    prevPracticeQuestion()
+    scrollToTop()
   }
 
   const questionHtml = sanitizeHtml(currentQuestion.examQue)
@@ -131,61 +142,13 @@ export default function PracticeMode({ questions }: PracticeModeProps) {
           </div>
         </CardHeader>
         <CardContent className="pt-0">
+          {/* Question Content - includes MC options in HTML */}
           <div
             className="prose prose-sm max-w-none text-gray-800 mb-4 question-content"
             dangerouslySetInnerHTML={{ __html: questionHtml }}
           />
 
-          {/* MC Options */}
-          {isMC && currentQuestion.options.length > 0 && (
-            <div className="space-y-2 mb-4">
-              {currentQuestion.options.map((opt) => {
-                const isSelected = selectedAnswer === opt.letter
-                const isCorrectOption = isRevealed && correctAnswer.includes(opt.letter)
-                const isWrongSelection = isRevealed && isSelected && !correctAnswer.includes(opt.letter)
-
-                return (
-                  <button
-                    key={opt.letter}
-                    onClick={() => handleOptionClick(opt.letter)}
-                    className={cn(
-                      "flex w-full items-start gap-3 rounded-lg border p-3 text-left text-sm transition-all",
-                      !isRevealed && "hover:border-gray-300 hover:bg-gray-50 cursor-pointer",
-                      !isRevealed && isSelected && "border-gray-400 bg-gray-100",
-                      isCorrectOption && "border-emerald-400 bg-emerald-50",
-                      isWrongSelection && "border-red-400 bg-red-50",
-                      isRevealed && "cursor-default"
-                    )}
-                  >
-                    <span
-                      className={cn(
-                        "flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-xs font-semibold",
-                        isCorrectOption && "border-emerald-500 bg-emerald-500 text-white",
-                        isWrongSelection && "border-red-500 bg-red-500 text-white",
-                        !isRevealed && isSelected && "border-gray-500 bg-gray-500 text-white",
-                        !isRevealed && !isSelected && "border-gray-300 text-gray-500"
-                      )}
-                    >
-                      {opt.letter}
-                    </span>
-                    <span
-                      className={cn(
-                        "flex-1 pt-0.5",
-                        isCorrectOption && "text-emerald-800 font-medium",
-                        isWrongSelection && "text-red-800 line-through"
-                      )}
-                    >
-                      {opt.text}
-                    </span>
-                    {isCorrectOption && <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-1" />}
-                    {isWrongSelection && <XCircle className="h-4 w-4 text-red-500 shrink-0 mt-1" />}
-                  </button>
-                )
-              })}
-            </div>
-          )}
-
-          {/* Reveal Answer for non-MC or MC without selection */}
+          {/* Reveal Answer button */}
           {!isRevealed && (
             <Button
               variant="outline"
@@ -194,7 +157,7 @@ export default function PracticeMode({ questions }: PracticeModeProps) {
               className="mb-4"
             >
               <Eye className="mr-1.5 h-3.5 w-3.5" />
-              {isMC && selectedAnswer ? "Check Answer" : "Reveal Answer"}
+              Reveal Answer
             </Button>
           )}
 
@@ -243,7 +206,7 @@ export default function PracticeMode({ questions }: PracticeModeProps) {
           variant="outline"
           size="sm"
           disabled={practiceSession.currentIndex === 0}
-          onClick={prevPracticeQuestion}
+          onClick={handlePrev}
         >
           <ChevronLeft className="h-4 w-4 mr-1" />
           Previous
@@ -252,7 +215,6 @@ export default function PracticeMode({ questions }: PracticeModeProps) {
           variant="default"
           size="sm"
           onClick={handleNext}
-          disabled={isMC && !isRevealed && !selectedAnswer}
         >
           {practiceSession.currentIndex >= practiceSession.questionIds.length - 1
             ? "Finish Quiz"

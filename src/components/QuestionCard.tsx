@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { ChevronDown, ChevronUp, Bookmark, BookmarkCheck, Eye, EyeOff, CheckCircle2, XCircle } from "lucide-react"
+import { Bookmark, BookmarkCheck, Eye, EyeOff, CheckCircle2 } from "lucide-react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -32,13 +32,7 @@ export default function QuestionCard({
 
   const showAnswer = answerRevealed || internalShowAnswer
   const bookmarked = isBookmarked(question._id)
-  const isMC = question.type === "MC"
   const correctAnswer = question.isAnswerLetter ? question.answerLetters : ""
-
-  const handleOptionClick = (letter: string) => {
-    if (!onAnswerSelect) return
-    onAnswerSelect(letter)
-  }
 
   const handleRevealAnswer = () => {
     setInternalShowAnswer(!showAnswer)
@@ -86,61 +80,11 @@ export default function QuestionCard({
         </div>
       </CardHeader>
       <CardContent className="pt-0">
-        {/* Question Content */}
+        {/* Question Content - includes MC options in the HTML */}
         <div
           className="prose prose-sm max-w-none text-gray-800 mb-4 question-content"
           dangerouslySetInnerHTML={{ __html: questionHtml }}
         />
-
-        {/* MC Options */}
-        {isMC && question.options.length > 0 && (
-          <div className="space-y-2 mb-4">
-            {question.options.map((opt) => {
-              const isSelected = selectedAnswer === opt.letter
-              const isCorrectOption = showAnswer && correctAnswer.includes(opt.letter)
-              const isWrongSelection = showAnswer && isSelected && !correctAnswer.includes(opt.letter)
-
-              return (
-                <button
-                  key={opt.letter}
-                  onClick={() => handleOptionClick(opt.letter)}
-                  disabled={answerRevealed}
-                  className={cn(
-                    "flex w-full items-start gap-3 rounded-lg border p-3 text-left text-sm transition-all",
-                    !showAnswer && !answerRevealed && "hover:border-gray-300 hover:bg-gray-50 cursor-pointer",
-                    !showAnswer && isSelected && "border-gray-400 bg-gray-100",
-                    isCorrectOption && "border-emerald-400 bg-emerald-50",
-                    isWrongSelection && "border-red-400 bg-red-50",
-                    answerRevealed && "cursor-default"
-                  )}
-                >
-                  <span
-                    className={cn(
-                      "flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-xs font-semibold",
-                      !showAnswer && isSelected && "border-gray-500 bg-gray-500 text-white",
-                      isCorrectOption && "border-emerald-500 bg-emerald-500 text-white",
-                      isWrongSelection && "border-red-500 bg-red-500 text-white",
-                      !showAnswer && !isSelected && "border-gray-300 text-gray-500"
-                    )}
-                  >
-                    {opt.letter}
-                  </span>
-                  <span
-                    className={cn(
-                      "flex-1 pt-0.5",
-                      isCorrectOption && "text-emerald-800 font-medium",
-                      isWrongSelection && "text-red-800 line-through"
-                    )}
-                  >
-                    {opt.text}
-                  </span>
-                  {isCorrectOption && <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-1" />}
-                  {isWrongSelection && <XCircle className="h-4 w-4 text-red-500 shrink-0 mt-1" />}
-                </button>
-              )
-            })}
-          </div>
-        )}
 
         {/* Show/Reveal Answer Button */}
         {!showAnswerByDefault && !answerRevealed && (

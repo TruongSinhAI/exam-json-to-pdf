@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
   Search,
@@ -38,6 +38,15 @@ export default function BrowseView({ questions }: BrowseViewProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [typeFilter, setTypeFilter] = useState<QuestionType | null>(null)
+
+  const scrollToTop = useCallback(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" })
+  }, [])
+
+  const handleIndexChange = useCallback((index: number) => {
+    setBrowseQuestionIndex(index)
+    scrollToTop()
+  }, [setBrowseQuestionIndex, scrollToTop])
 
   const filteredQuestions = useMemo(() => {
     let filtered = questions
@@ -96,7 +105,7 @@ export default function BrowseView({ questions }: BrowseViewProps) {
                     value={searchQuery}
                     onChange={(e) => {
                       setSearchQuery(e.target.value)
-                      setBrowseQuestionIndex(0)
+                      handleIndexChange(0)
                     }}
                   />
                 </div>
@@ -108,7 +117,7 @@ export default function BrowseView({ questions }: BrowseViewProps) {
                     <button
                       onClick={() => {
                         setSelectedTopic(null)
-                        setBrowseQuestionIndex(0)
+                        handleIndexChange(0)
                       }}
                       className={cn(
                         "flex w-full items-center justify-between rounded-md px-2 py-1.5 text-xs font-medium transition-colors",
@@ -127,7 +136,7 @@ export default function BrowseView({ questions }: BrowseViewProps) {
                           key={topic.id}
                           onClick={() => {
                             setSelectedTopic(topic.id)
-                            setBrowseQuestionIndex(0)
+                            handleIndexChange(0)
                           }}
                           className={cn(
                             "flex w-full items-center justify-between rounded-md px-2 py-1.5 text-xs font-medium transition-colors",
@@ -154,7 +163,7 @@ export default function BrowseView({ questions }: BrowseViewProps) {
                     <button
                       onClick={() => {
                         setTypeFilter(null)
-                        setBrowseQuestionIndex(0)
+                        handleIndexChange(0)
                       }}
                       className={cn(
                         "rounded-full px-2 py-0.5 text-xs font-medium transition-colors",
@@ -170,7 +179,7 @@ export default function BrowseView({ questions }: BrowseViewProps) {
                         key={type}
                         onClick={() => {
                           setTypeFilter(type)
-                          setBrowseQuestionIndex(0)
+                          handleIndexChange(0)
                         }}
                         className={cn(
                           "rounded-full px-2 py-0.5 text-xs font-medium transition-colors",
@@ -197,7 +206,7 @@ export default function BrowseView({ questions }: BrowseViewProps) {
                       return (
                         <button
                           key={q._id}
-                          onClick={() => setBrowseQuestionIndex(idx)}
+                          onClick={() => handleIndexChange(idx)}
                           className={cn(
                             "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors",
                             isCurrent
@@ -254,7 +263,7 @@ export default function BrowseView({ questions }: BrowseViewProps) {
                 variant="outline"
                 size="sm"
                 disabled={browseQuestionIndex === 0}
-                onClick={() => setBrowseQuestionIndex(browseQuestionIndex - 1)}
+                onClick={() => handleIndexChange(browseQuestionIndex - 1)}
               >
                 <ChevronLeft className="h-4 w-4 mr-1" />
                 Previous
@@ -266,7 +275,7 @@ export default function BrowseView({ questions }: BrowseViewProps) {
                 variant="outline"
                 size="sm"
                 disabled={browseQuestionIndex >= filteredQuestions.length - 1}
-                onClick={() => setBrowseQuestionIndex(browseQuestionIndex + 1)}
+                onClick={() => handleIndexChange(browseQuestionIndex + 1)}
               >
                 Next
                 <ChevronRight className="h-4 w-4 ml-1" />
