@@ -14,9 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AB-100 Exam Prep - Microsoft Dynamics 365",
-  description: "Interactive study tool for the Microsoft AB-100 certification exam. Practice questions, track progress, and ace your exam.",
-  keywords: ["AB-100", "Microsoft", "Dynamics 365", "certification", "exam prep"],
+  title: "Exam JSON → PDF Converter",
+  description: "Convert exam JSON data to professional PDF documents. Upload any exam JSON, customize your PDF output with answers, explanations, and more.",
+  keywords: ["exam", "JSON", "PDF", "converter", "certification", "study"],
 };
 
 export default function RootLayout({
