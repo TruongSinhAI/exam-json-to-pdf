@@ -713,7 +713,7 @@ export default function Home() {
                       <Separator />
 
                       {/* Topic Filter */}
-                      {parsedData.topics.length > 1 && (
+                      {parsedData.topics.length >= 1 && (
                         <div className="space-y-2">
                           <Label>Chọn Topics</Label>
                           <div className="space-y-2">
